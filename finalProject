@@ -1,0 +1,164 @@
+//import java.io.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Scanner;
+
+class Expense {
+    String category;
+    double amount;
+    String date;
+    String description;
+
+    Expense(String category, double amount, String date, String description) {
+        this.category = category;
+        this.amount = amount;
+        this.date = date;
+        this.description = description;
+    }
+
+    @Override
+    public String toString() {
+        return category + "," + amount + "," + date + "," + description;
+    }
+
+    public static Expense fromString(String expenseString) {
+        String[] parts = expenseString.split(",");
+        return new Expense(parts[0], Double.parseDouble(parts[1]), parts[2], parts[3]);
+    }
+}
+
+public class ExpenseTracker {
+    //private static final String FILE_NAME = "expenses.txt";
+    private static final List<Expense> expenses = new ArrayList<>();
+    private static double totalAmount = 0;
+
+    public static void main(String[] args) {
+        //readExpensesFromFile();
+
+        Scanner scanner = new Scanner(System.in);
+        String command;
+
+        while (true) {
+            System.out.println("Enter a command (add, list, search, searchrange, total, summary, exit):");
+            command = scanner.nextLine();
+
+            switch (command.toLowerCase()) {
+                case "add" -> addExpense(scanner);
+                case "list" -> listExpenses();
+                case "search" -> searchExpenses(scanner);
+                case "searchrange" -> searchExpensesByAmountRange(scanner);
+                case "total" -> showTotalAmount();
+                case "summary" -> showSummary();
+                case "exit" -> {
+                    System.out.println("Exiting the program.");
+                    scanner.close();
+                    //writeExpensesToFile();
+                    return;
+                }
+                default -> System.out.println("Unknown command. Please try again.");
+            }
+        }
+    }
+
+    private static void addExpense(Scanner scanner) {
+        System.out.println("Enter category:");
+        String category = scanner.nextLine();
+
+        System.out.println("Enter amount:");
+        double amount = Double.parseDouble(scanner.nextLine());
+        
+    
+        System.out.println("Enter date (YYYY-MM-DD):");
+        String date = scanner.nextLine();
+
+        System.out.println("Enter description:");
+        String description = scanner.nextLine();
+
+        if (amount > 0){
+        Expense expense = new Expense(category, amount, date, description);
+        expenses.add(expense);
+        totalAmount += amount;
+
+        System.out.println("Expense added successfully.");
+        }
+    }
+
+    private static void listExpenses() {
+        System.out.printf("%-20s %-10s %-15s %-30s%n", "Category", "Amount", "Date", "Description");
+        System.out.println("---------------------------------------------------------------");
+        for (Expense expense : expenses) {
+            System.out.printf("%-20s %-10.2f %-15s %-30s%n", expense.category, expense.amount, expense.date, expense.description);
+    }
+    }
+
+    private static void searchExpenses(Scanner scanner) {
+        System.out.println("Enter category to search:");
+        String searchText = scanner.nextLine().toLowerCase();
+
+        System.out.printf("%-20s %-10s %-15s %-30s%n", "Category", "Amount", "Date", "Description");
+        System.out.println("---------------------------------------------------------------");
+        for (Expense expense : expenses) {
+            if (expense.category.toLowerCase().contains(searchText)) {
+                System.out.printf("%-20s %-10.2f %-15s %-30s%n", expense.category, expense.amount, expense.date, expense.description);
+            }
+        }
+    }
+
+    private static void searchExpensesByAmountRange(Scanner scanner) {
+        System.out.println("Enter minimum amount:");
+        double minAmount = Double.parseDouble(scanner.nextLine());
+        System.out.println("Enter maximum amount:");
+        double maxAmount = Double.parseDouble(scanner.nextLine());
+
+        System.out.printf("%-20s %-10s %-15s %-30s%n", "Category", "Amount", "Date", "Description");
+        System.out.println("---------------------------------------------------------------");
+        for (Expense expense : expenses) {
+            if (expense.amount >= minAmount && expense.amount <= maxAmount) {
+                System.out.printf("%-20s %-10.2f %-15s %-30s%n", expense.category, expense.amount, expense.date, expense.description);
+            }
+        }
+    }
+
+    private static void showTotalAmount() {
+        System.out.println("Total Amount: " + totalAmount);
+    }
+
+    private static void showSummary() {
+        HashMap<String, Double> summary = new HashMap<>();
+
+        for (Expense expense : expenses) {
+            summary.put(expense.category, summary.getOrDefault(expense.category, 0.0) + expense.amount);
+        }
+
+        System.out.printf("%-20s %-10s%n", "Category", "Total Amount");
+        System.out.println("------------------------------");
+        for (String category : summary.keySet()) {
+            System.out.printf("%-20s %-10.2f%n", category, summary.get(category));
+        }
+    }
+
+     /* private static void readExpensesFromFile() {
+        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_NAME))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                Expense expense = Expense.fromString(line);
+                expenses.add(expense);
+                totalAmount += expense.amount;
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading from file: " + e.getMessage());
+        }*/
+    
+
+   /*  private static void writeExpensesToFile() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME))) {
+            for (Expense expense : expenses) {
+                writer.write(expense.toString());
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.out.println("Error writing to file: " + e.getMessage());
+        }
+    }*/
+}
